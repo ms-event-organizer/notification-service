@@ -2,6 +2,7 @@ package ru.msteam.notificationservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import ru.msteam.notificationservice.client.UserClient;
@@ -17,12 +18,13 @@ public class RegistrationNotificationService {
 
     private final UserClient userClient;
 
-    private final long NOTIFICATION_SERVICE_ID = 666;
+    @Value("${app.notification-service-id}")
+    private long notificationServiceId;
 
     @KafkaListener(topics = "${app.kafka.registration-service.topic}")
     public void listen(RegistrationNotification registrationNotification) {
         log.info("Received notification from registration service: '{}'", registrationNotification);
-        final UserDto eventOwner = userClient.getUser(NOTIFICATION_SERVICE_ID, registrationNotification.eventOwnerId());
+        final UserDto eventOwner = userClient.getUser(notificationServiceId, registrationNotification.eventOwnerId());
         sendEventRegistrationNotification(eventOwner, registrationNotification);
     }
 
